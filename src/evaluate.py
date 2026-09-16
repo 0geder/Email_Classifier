@@ -24,6 +24,7 @@ RESULTS_DIR = REPO_ROOT / "results"
 
 N_FOLDS = 5
 CONFIDENCE_BINS = [0.0, 0.5, 0.7, 0.85, 0.95, 1.01]
+PRIMARY_MODEL = "embedding_centroid"
 
 
 def cross_validate(model_cls, emails: list[Email], n_folds: int = N_FOLDS) -> dict:
@@ -120,6 +121,11 @@ def main() -> None:
         out_path = RESULTS_DIR / f"predictions_{model_name}.csv"
         predictions.to_csv(out_path, index=False)
         print(f"wrote {out_path}")
+
+        if model_name == PRIMARY_MODEL:
+            primary_path = RESULTS_DIR / "predictions.csv"
+            predictions.to_csv(primary_path, index=False)
+            print(f"wrote {primary_path} (primary submission, model={model_name})")
 
     comparison = pd.DataFrame(
         [

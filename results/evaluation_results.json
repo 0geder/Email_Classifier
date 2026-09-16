@@ -1,0 +1,132 @@
+{
+  "baseline_tfidf_logreg": {
+    "accuracy": 0.9090909090909091,
+    "macro_f1": 0.8639257294429707,
+    "per_class": {
+      "Account Management": {
+        "precision": 0.8125,
+        "recall": 1.0,
+        "f1-score": 0.896551724137931,
+        "support": 13.0
+      },
+      "Insurance Claims": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 7.0
+      },
+      "Investment Advisory": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 12.0
+      },
+      "Loan Processing": {
+        "precision": 0.8571428571428571,
+        "recall": 1.0,
+        "f1-score": 0.9230769230769231,
+        "support": 6.0
+      },
+      "Other": {
+        "precision": 1.0,
+        "recall": 0.3333333333333333,
+        "f1-score": 0.5,
+        "support": 6.0
+      }
+    },
+    "calibration": [
+      {
+        "confidence_range": "[0.00, 0.50)",
+        "n": 37,
+        "empirical_accuracy": 0.8918918918918919
+      },
+      {
+        "confidence_range": "[0.50, 0.70)",
+        "n": 7,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.70, 0.85)",
+        "n": 0,
+        "empirical_accuracy": null
+      },
+      {
+        "confidence_range": "[0.85, 0.95)",
+        "n": 0,
+        "empirical_accuracy": null
+      },
+      {
+        "confidence_range": "[0.95, 1.01)",
+        "n": 0,
+        "empirical_accuracy": null
+      }
+    ],
+    "cv_wall_time_seconds": 0.10523960000136867,
+    "n_folds": 5
+  },
+  "embedding_centroid": {
+    "accuracy": 0.9318181818181818,
+    "macro_f1": 0.9220699300699302,
+    "per_class": {
+      "Account Management": {
+        "precision": 0.9230769230769231,
+        "recall": 0.9230769230769231,
+        "f1-score": 0.9230769230769231,
+        "support": 13.0
+      },
+      "Insurance Claims": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 7.0
+      },
+      "Investment Advisory": {
+        "precision": 0.9230769230769231,
+        "recall": 1.0,
+        "f1-score": 0.96,
+        "support": 12.0
+      },
+      "Loan Processing": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 6.0
+      },
+      "Other": {
+        "precision": 0.8,
+        "recall": 0.6666666666666666,
+        "f1-score": 0.7272727272727273,
+        "support": 6.0
+      }
+    },
+    "calibration": [
+      {
+        "confidence_range": "[0.00, 0.50)",
+        "n": 0,
+        "empirical_accuracy": null
+      },
+      {
+        "confidence_range": "[0.50, 0.70)",
+        "n": 7,
+        "empirical_accuracy": 0.5714285714285714
+      },
+      {
+        "confidence_range": "[0.70, 0.85)",
+        "n": 3,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.85, 0.95)",
+        "n": 7,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.95, 1.01)",
+        "n": 27,
+        "empirical_accuracy": 1.0
+      }
+    ],
+    "cv_wall_time_seconds": 98.1356364999956,
+    "n_folds": 5
+  }
+}
