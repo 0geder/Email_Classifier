@@ -56,7 +56,8 @@ actual environment changed that.
    class.
 
 So the primary approach became a frozen sentence-embedding encoder
-(`all-MiniLM-L6-v2`) with a nearest-centroid classifier: embed each labeled
+([Sentence-BERT](https://arxiv.org/abs/1908.10084), `all-MiniLM-L6-v2`) with a
+nearest-centroid classifier: embed each labeled
 email, average the embeddings per class into a centroid, and classify a new
 email by cosine similarity to each centroid (softmax over similarities gives
 the confidence score). This needs no training beyond averaging a handful of
@@ -155,9 +156,10 @@ feasibility methodology below) were adopted after reviewing an alternative
 approach to this same challenge; see Comparative Review of an Alternative
 Approach for exactly what was reused and what was not.
 
-Bootstrap confidence intervals. With only 44 labeled examples, a point
-accuracy estimate implies more precision than the sample supports. A
-5,000-resample bootstrap on the out-of-fold correctness array gives the
+[Bootstrap confidence intervals](https://www.routledge.com/An-Introduction-to-the-Bootstrap/Efron-Tibshirani/p/book/9780412042317)
+matter here: with only 44 labeled examples, a point accuracy estimate
+implies more precision than the sample supports. A 5,000-resample bootstrap
+on the out-of-fold correctness array gives the
 primary embedding classifier a 95 percent confidence interval of 0.886 to
 1.000 around its 0.955 point accuracy, and the baseline an interval of 0.841
 to 1.000 around 0.932. Reporting the interval, not just the point estimate,
@@ -166,9 +168,10 @@ is part of being honest about what this evaluation can and cannot claim
 
 Calibration, verified against leakage. Both classifiers' raw confidence
 scores are miscalibrated in different directions. The baseline is badly
-under-confident (expected calibration error, ECE, of 0.496 before scaling),
-while the embedding classifier starts much closer to calibrated already (ECE
-0.105). A single-parameter temperature fit on the pooled out-of-fold
+under-confident ([expected calibration error](https://arxiv.org/abs/2501.19047),
+ECE, of 0.496 before scaling), while the embedding classifier starts much
+closer to calibrated already (ECE 0.105). A single-parameter
+[temperature fit](https://arxiv.org/abs/1706.04599) on the pooled out-of-fold
 probabilities (`calibration.fit_temperature`) brings both down substantially:
 the baseline to ECE 0.069, the embedding classifier to ECE 0.034. Because
 fitting the temperature on the same probabilities used to measure it risks
@@ -184,7 +187,8 @@ to 0.074, improving in 80 percent of evaluations. The calibrated
 confidence score, not the raw softmax or `predict_proba` output, is what is
 written into `results/predictions.csv` and the per-model prediction files.
 
-Risk-coverage and an evidence-based operating threshold.
+[Risk-coverage](https://papers.neurips.cc/paper/7073-selective-classification-for-deep-neural-networks)
+and an evidence-based operating threshold.
 `calibration.risk_coverage_table` sweeps the auto-routing confidence
 threshold and reports coverage, accuracy on the auto-routed emails, and the
 resulting misroute count at each level. For the primary embedding classifier,
@@ -194,9 +198,10 @@ misroutes observed in cross-validation; the baseline needs a threshold of
 intuition, is what an operating threshold should be chosen from. Full tables
 for both models are in `results/evaluation_report.txt`.
 
-Conformal prediction: currently infeasible, and by how much. A
-distribution-free, class-conditional coverage guarantee (Mondrian conformal
-prediction) would be a stronger, more regulator-defensible way to bound a
+[Conformal prediction](https://arxiv.org/abs/2107.07511): currently
+infeasible, and by how much. A distribution-free, class-conditional coverage
+guarantee (Mondrian conformal prediction) would be a stronger, more
+regulator-defensible way to bound a
 routing decision than a heuristic confidence threshold. It is not available
 yet on this data: split conformal prediction requires at least
 `ceil((1 - alpha) * (n + 1)) <= n` calibration examples per class, which
@@ -302,13 +307,15 @@ Measuring success, given the regulatory stakes of misrouting:
   regulated environment.
 - Log every prediction with its input, category, confidence, and, if
   reviewed, the human-corrected label, both for retraining and because
-  financial email handling is subject to recordkeeping obligations. SEC Rule
-  17a-4 requires broker-dealers to retain business communications, with
-  immediate accessibility for two years and six-year total retention, and
-  2026 FINRA guidance extends this scrutiny explicitly to AI-assisted
-  tooling (see sources below). An automated classifier making routing
-  decisions on regulated correspondence should itself produce an auditable
-  decision trail, not just a label.
+  financial email handling is subject to recordkeeping obligations.
+  [SEC Rule 17a-4](https://www.law.cornell.edu/cfr/text/17/240.17a-4)
+  requires broker-dealers to retain business communications, with immediate
+  accessibility for two years and six-year total retention, and
+  [FINRA's 2026 Annual Regulatory Oversight Report](https://www.finra.org/sites/default/files/2025-12/2026-annual-regulatory-oversight-report.pdf)
+  extends this scrutiny explicitly to generative-AI and AI-assisted tooling
+  (see Sources below). An automated classifier making routing decisions on
+  regulated correspondence should itself produce an auditable decision
+  trail, not just a label.
 
 What would improve accuracy and compliance value most, with more data:
 
@@ -332,7 +339,7 @@ What would improve accuracy and compliance value most, with more data:
   threshold above; the point here is to keep tightening it as more data
   arrives).
 
-Sources: [FINRA Email Retention Requirements (2026 Guide), Smarsh](https://www.smarsh.com/compliance-glossary/finra-email-retention-requirements/), [Understanding Model Calibration, arXiv:2501.19047](https://arxiv.org/pdf/2501.19047)
+See Sources at the end of this document for the full reference list.
 
 ## Assumptions and trade-offs (consolidated)
 
@@ -352,7 +359,8 @@ Sources: [FINRA Email Retention Requirements (2026 Guide), Smarsh](https://www.s
    (`Email.text` in `ingestion.py`) to weight it slightly higher than the
    body for the sparse TF-IDF representation; this is a no-op for the dense
    embedding model but kept consistent across both for a fair comparison.
-5. Added character n-gram TF-IDF features to the baseline after reviewing a
+5. Added [character n-gram](https://www.researchgate.net/publication/2375544_N-Gram-Based_Text_Categorization)
+   TF-IDF features to the baseline after reviewing a
    colleague's independent implementation that used them, kept only after an
    ablation on this project's own cross-validation confirmed a genuine
    macro-F1 gain (0.864 to 0.904). See Comparative Review above.
@@ -409,3 +417,54 @@ Sources: [FINRA Email Retention Requirements (2026 Guide), Smarsh](https://www.s
 4. Multi-label support. The current design assumes one category per
    email, but a real email ("please also update my beneficiary and file a
    claim") could legitimately belong to more than one department.
+
+## Sources
+
+Methodology:
+
+- Guo, C., Pleiss, G., Sun, Y., and Weinberger, K. Q. (2017). On Calibration
+  of Modern Neural Networks. Proceedings of the 34th International
+  Conference on Machine Learning (ICML), PMLR 70:1321-1330. The origin of
+  temperature scaling, used here in `calibration.fit_temperature`.
+  https://arxiv.org/abs/1706.04599
+- Pavlovic, M. (2025). Understanding Model Calibration: A gentle
+  introduction and visual exploration of calibration and the expected
+  calibration error (ECE). Accepted at ICLR Blogposts 2025. The definition
+  of ECE used in `calibration.expected_calibration_error`.
+  https://arxiv.org/abs/2501.19047
+- Efron, B., and Tibshirani, R. J. (1993). An Introduction to the Bootstrap.
+  Chapman and Hall/CRC. The basis for the bootstrap confidence interval in
+  `calibration.bootstrap_accuracy_ci`.
+  https://www.routledge.com/An-Introduction-to-the-Bootstrap/Efron-Tibshirani/p/book/9780412042317
+- Angelopoulos, A. N., and Bates, S. (2021). A Gentle Introduction to
+  Conformal Prediction and Distribution-Free Uncertainty Quantification.
+  The source of the class-conditional (Mondrian) conformal prediction
+  feasibility bound in `calibration.conformal_min_n`.
+  https://arxiv.org/abs/2107.07511
+- Geifman, Y., and El-Yaniv, R. (2017). Selective Classification for Deep
+  Neural Networks. Advances in Neural Information Processing Systems 30
+  (NeurIPS). The risk-coverage framing behind
+  `calibration.risk_coverage_table`.
+  https://papers.neurips.cc/paper/7073-selective-classification-for-deep-neural-networks
+- Reimers, N., and Gurevych, I. (2019). Sentence-BERT: Sentence Embeddings
+  using Siamese BERT-Networks. Proceedings of EMNLP-IJCNLP 2019. The
+  sentence-embedding approach behind the primary classifier's
+  `all-MiniLM-L6-v2` encoder.
+  https://arxiv.org/abs/1908.10084
+- Cavnar, W. B., and Trenkle, J. M. (1994). N-Gram-Based Text
+  Categorization. Proceedings of SDAIR-94, 3rd Annual Symposium on Document
+  Analysis and Information Retrieval, pp. 161-175. The basis for the
+  character n-gram feature added to the TF-IDF baseline.
+  https://www.researchgate.net/publication/2375544_N-Gram-Based_Text_Categorization
+
+Regulatory:
+
+- U.S. Securities and Exchange Commission. 17 CFR Section 240.17a-4,
+  Records to be preserved by certain exchange members, brokers and dealers.
+  https://www.law.cornell.edu/cfr/text/17/240.17a-4
+- Financial Industry Regulatory Authority (FINRA). 2026 Annual Regulatory
+  Oversight Report, Generative AI section (published December 2025).
+  https://www.finra.org/sites/default/files/2025-12/2026-annual-regulatory-oversight-report.pdf
+- Smarsh. FINRA Email Retention Requirements (2026 Guide). A practitioner
+  summary of the above, kept as a secondary, more readable reference.
+  https://www.smarsh.com/compliance-glossary/finra-email-retention-requirements/
