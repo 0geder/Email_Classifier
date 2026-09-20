@@ -47,3 +47,13 @@ def test_predict_before_fit_raises():
     model = EmbeddingClassifier()
     with pytest.raises(RuntimeError):
         model.predict(SYNTHETIC_TRAIN)
+
+
+def test_predict_proba_rows_sum_to_one():
+    import numpy as np
+
+    model = _fitted()
+    classes, probs = model.predict_proba(SYNTHETIC_TRAIN)
+    assert probs.shape == (len(SYNTHETIC_TRAIN), len(classes))
+    assert np.allclose(probs.sum(axis=1), 1.0)
+    assert (probs >= 0.0).all() and (probs <= 1.0).all()

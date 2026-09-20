@@ -1,12 +1,24 @@
 {
+  "conformal_feasibility": {
+    "min_labels_per_class_90pct": 9,
+    "min_labels_per_class_95pct": 19,
+    "actual_labels_per_class": {
+      "Account Management": 13,
+      "Insurance Claims": 7,
+      "Investment Advisory": 12,
+      "Loan Processing": 6,
+      "Other": 6
+    },
+    "smallest_class_count": 6
+  },
   "baseline_tfidf_logreg": {
-    "accuracy": 0.9090909090909091,
-    "macro_f1": 0.8639257294429707,
+    "accuracy": 0.9318181818181818,
+    "macro_f1": 0.9036630036630038,
     "per_class": {
       "Account Management": {
-        "precision": 0.8125,
+        "precision": 0.8666666666666667,
         "recall": 1.0,
-        "f1-score": 0.896551724137931,
+        "f1-score": 0.9285714285714286,
         "support": 13.0
       },
       "Insurance Claims": {
@@ -29,26 +41,26 @@
       },
       "Other": {
         "precision": 1.0,
-        "recall": 0.3333333333333333,
-        "f1-score": 0.5,
+        "recall": 0.5,
+        "f1-score": 0.6666666666666666,
         "support": 6.0
       }
     },
     "calibration": [
       {
         "confidence_range": "[0.00, 0.50)",
-        "n": 37,
-        "empirical_accuracy": 0.8918918918918919
+        "n": 34,
+        "empirical_accuracy": 0.9117647058823529
       },
       {
         "confidence_range": "[0.50, 0.70)",
-        "n": 7,
+        "n": 8,
         "empirical_accuracy": 1.0
       },
       {
         "confidence_range": "[0.70, 0.85)",
-        "n": 0,
-        "empirical_accuracy": null
+        "n": 2,
+        "empirical_accuracy": 1.0
       },
       {
         "confidence_range": "[0.85, 0.95)",
@@ -61,17 +73,188 @@
         "empirical_accuracy": null
       }
     ],
-    "cv_wall_time_seconds": 0.10523960000136867,
-    "n_folds": 5
+    "bootstrap_ci_95": {
+      "low": 0.8409090909090909,
+      "high": 1.0
+    },
+    "ece_raw": 0.49577903888151365,
+    "brier_raw": 0.4304429013285691,
+    "temperature": 0.1509909454419962,
+    "ece_calibrated": 0.06940069084155086,
+    "brier_calibrated": 0.10754364819161112,
+    "calibration_table_raw": [
+      {
+        "confidence_range": "[0.20, 0.30)",
+        "n": 4,
+        "mean_confidence": 0.2709,
+        "empirical_accuracy": 0.75
+      },
+      {
+        "confidence_range": "[0.30, 0.40)",
+        "n": 17,
+        "mean_confidence": 0.3491,
+        "empirical_accuracy": 0.8824
+      },
+      {
+        "confidence_range": "[0.40, 0.50)",
+        "n": 13,
+        "mean_confidence": 0.4539,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.50, 0.60)",
+        "n": 4,
+        "mean_confidence": 0.559,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.60, 0.70)",
+        "n": 4,
+        "mean_confidence": 0.6507,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.70, 0.80)",
+        "n": 2,
+        "mean_confidence": 0.7138,
+        "empirical_accuracy": 1.0
+      }
+    ],
+    "calibration_table_calibrated": [
+      {
+        "confidence_range": "[0.50, 0.60)",
+        "n": 2,
+        "mean_confidence": 0.5506,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.60, 0.70)",
+        "n": 1,
+        "mean_confidence": 0.6014,
+        "empirical_accuracy": 0.0
+      },
+      {
+        "confidence_range": "[0.70, 0.80)",
+        "n": 2,
+        "mean_confidence": 0.7704,
+        "empirical_accuracy": 0.5
+      },
+      {
+        "confidence_range": "[0.80, 0.90)",
+        "n": 4,
+        "mean_confidence": 0.8654,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.90, 1.00]",
+        "n": 35,
+        "mean_confidence": 0.985,
+        "empirical_accuracy": 0.9714
+      }
+    ],
+    "risk_coverage": [
+      {
+        "threshold": 0.0,
+        "coverage": 1.0,
+        "n_routed": 44,
+        "accuracy_on_routed": 0.9318,
+        "misroutes": 3
+      },
+      {
+        "threshold": 0.5,
+        "coverage": 1.0,
+        "n_routed": 44,
+        "accuracy_on_routed": 0.9318,
+        "misroutes": 3
+      },
+      {
+        "threshold": 0.7,
+        "coverage": 0.9318,
+        "n_routed": 41,
+        "accuracy_on_routed": 0.9512,
+        "misroutes": 2
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 0.8864,
+        "n_routed": 39,
+        "accuracy_on_routed": 0.9744,
+        "misroutes": 1
+      },
+      {
+        "threshold": 0.9,
+        "coverage": 0.7955,
+        "n_routed": 35,
+        "accuracy_on_routed": 0.9714,
+        "misroutes": 1
+      },
+      {
+        "threshold": 0.95,
+        "coverage": 0.7045,
+        "n_routed": 31,
+        "accuracy_on_routed": 1.0,
+        "misroutes": 0
+      },
+      {
+        "threshold": 0.99,
+        "coverage": 0.5,
+        "n_routed": 22,
+        "accuracy_on_routed": 1.0,
+        "misroutes": 0
+      }
+    ],
+    "cost_weighted_error": 0.06818181818181818,
+    "misclassified": [
+      {
+        "email_id": "20",
+        "true_category": "Other",
+        "predicted_category": "Loan Processing",
+        "confidence": 0.9019,
+        "text_snippet": "Job Application Response Job Application Response Dear Applicant, Thank you for "
+      },
+      {
+        "email_id": "30",
+        "true_category": "Other",
+        "predicted_category": "Account Management",
+        "confidence": 0.7731,
+        "text_snippet": "Security Alert Security Alert Dear Client, We detected unusual activity on your "
+      },
+      {
+        "email_id": "40",
+        "true_category": "Other",
+        "predicted_category": "Account Management",
+        "confidence": 0.6014,
+        "text_snippet": "Customer Satisfaction Survey Customer Satisfaction Survey Dear Valued Client, We"
+      }
+    ],
+    "classes": [
+      "Account Management",
+      "Insurance Claims",
+      "Investment Advisory",
+      "Loan Processing",
+      "Other"
+    ],
+    "n_labeled": 44,
+    "cv_wall_time_seconds": 6.5607468000016524,
+    "n_folds": 5,
+    "n_repeats": 10,
+    "nested_calibration_check": {
+      "ece_before_mean": 0.5051154005671744,
+      "ece_before_std": 0.05240992174025985,
+      "ece_after_mean": 0.0912036444377038,
+      "ece_after_std": 0.03639961944414419,
+      "n_outer_evaluations": 25,
+      "improved_fraction": 1.0
+    }
   },
   "embedding_centroid": {
-    "accuracy": 0.9318181818181818,
-    "macro_f1": 0.9220699300699302,
+    "accuracy": 0.9545454545454546,
+    "macro_f1": 0.9445925925925925,
     "per_class": {
       "Account Management": {
-        "precision": 0.9230769230769231,
-        "recall": 0.9230769230769231,
-        "f1-score": 0.9230769230769231,
+        "precision": 0.9285714285714286,
+        "recall": 1.0,
+        "f1-score": 0.9629629629629629,
         "support": 13.0
       },
       "Insurance Claims": {
@@ -93,40 +276,204 @@
         "support": 6.0
       },
       "Other": {
-        "precision": 0.8,
+        "precision": 1.0,
         "recall": 0.6666666666666666,
-        "f1-score": 0.7272727272727273,
+        "f1-score": 0.8,
         "support": 6.0
       }
     },
     "calibration": [
       {
         "confidence_range": "[0.00, 0.50)",
-        "n": 0,
-        "empirical_accuracy": null
+        "n": 1,
+        "empirical_accuracy": 0.0
       },
       {
         "confidence_range": "[0.50, 0.70)",
-        "n": 7,
-        "empirical_accuracy": 0.5714285714285714
+        "n": 5,
+        "empirical_accuracy": 0.8
       },
       {
         "confidence_range": "[0.70, 0.85)",
-        "n": 3,
+        "n": 5,
         "empirical_accuracy": 1.0
       },
       {
         "confidence_range": "[0.85, 0.95)",
-        "n": 7,
+        "n": 4,
         "empirical_accuracy": 1.0
       },
       {
         "confidence_range": "[0.95, 1.01)",
-        "n": 27,
+        "n": 29,
         "empirical_accuracy": 1.0
       }
     ],
-    "cv_wall_time_seconds": 98.1356364999956,
-    "n_folds": 5
+    "bootstrap_ci_95": {
+      "low": 0.8863636363636364,
+      "high": 1.0
+    },
+    "ece_raw": 0.10477104339409955,
+    "brier_raw": 0.07983009378743727,
+    "temperature": 0.44314059189962696,
+    "ece_calibrated": 0.03447590814056373,
+    "brier_calibrated": 0.06991345621515933,
+    "calibration_table_raw": [
+      {
+        "confidence_range": "[0.30, 0.40)",
+        "n": 1,
+        "mean_confidence": 0.3963,
+        "empirical_accuracy": 0.0
+      },
+      {
+        "confidence_range": "[0.50, 0.60)",
+        "n": 4,
+        "mean_confidence": 0.5554,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.60, 0.70)",
+        "n": 1,
+        "mean_confidence": 0.6405,
+        "empirical_accuracy": 0.0
+      },
+      {
+        "confidence_range": "[0.70, 0.80)",
+        "n": 3,
+        "mean_confidence": 0.7685,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.80, 0.90)",
+        "n": 3,
+        "mean_confidence": 0.8337,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.90, 1.00]",
+        "n": 32,
+        "mean_confidence": 0.9812,
+        "empirical_accuracy": 1.0
+      }
+    ],
+    "calibration_table_calibrated": [
+      {
+        "confidence_range": "[0.50, 0.60)",
+        "n": 2,
+        "mean_confidence": 0.5563,
+        "empirical_accuracy": 0.5
+      },
+      {
+        "confidence_range": "[0.60, 0.70)",
+        "n": 1,
+        "mean_confidence": 0.6577,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.70, 0.80)",
+        "n": 1,
+        "mean_confidence": 0.7799,
+        "empirical_accuracy": 1.0
+      },
+      {
+        "confidence_range": "[0.80, 0.90)",
+        "n": 2,
+        "mean_confidence": 0.812,
+        "empirical_accuracy": 0.5
+      },
+      {
+        "confidence_range": "[0.90, 1.00]",
+        "n": 38,
+        "mean_confidence": 0.9943,
+        "empirical_accuracy": 1.0
+      }
+    ],
+    "risk_coverage": [
+      {
+        "threshold": 0.0,
+        "coverage": 1.0,
+        "n_routed": 44,
+        "accuracy_on_routed": 0.9545,
+        "misroutes": 2
+      },
+      {
+        "threshold": 0.5,
+        "coverage": 1.0,
+        "n_routed": 44,
+        "accuracy_on_routed": 0.9545,
+        "misroutes": 2
+      },
+      {
+        "threshold": 0.7,
+        "coverage": 0.9318,
+        "n_routed": 41,
+        "accuracy_on_routed": 0.9756,
+        "misroutes": 1
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 0.9091,
+        "n_routed": 40,
+        "accuracy_on_routed": 0.975,
+        "misroutes": 1
+      },
+      {
+        "threshold": 0.9,
+        "coverage": 0.8636,
+        "n_routed": 38,
+        "accuracy_on_routed": 1.0,
+        "misroutes": 0
+      },
+      {
+        "threshold": 0.95,
+        "coverage": 0.8636,
+        "n_routed": 38,
+        "accuracy_on_routed": 1.0,
+        "misroutes": 0
+      },
+      {
+        "threshold": 0.99,
+        "coverage": 0.75,
+        "n_routed": 33,
+        "accuracy_on_routed": 1.0,
+        "misroutes": 0
+      }
+    ],
+    "cost_weighted_error": 0.045454545454545456,
+    "misclassified": [
+      {
+        "email_id": "20",
+        "true_category": "Other",
+        "predicted_category": "Investment Advisory",
+        "confidence": 0.5288,
+        "text_snippet": "Job Application Response Job Application Response Dear Applicant, Thank you for "
+      },
+      {
+        "email_id": "25",
+        "true_category": "Other",
+        "predicted_category": "Account Management",
+        "confidence": 0.8182,
+        "text_snippet": "Regulatory Update Regulatory Update Dear Clients, Please be aware of new regulat"
+      }
+    ],
+    "classes": [
+      "Account Management",
+      "Insurance Claims",
+      "Investment Advisory",
+      "Loan Processing",
+      "Other"
+    ],
+    "n_labeled": 44,
+    "cv_wall_time_seconds": 0.07293770000251243,
+    "n_folds": 5,
+    "n_repeats": 10,
+    "nested_calibration_check": {
+      "ece_before_mean": 0.08735685378313064,
+      "ece_before_std": 0.03831183642012657,
+      "ece_after_mean": 0.0741736959748798,
+      "ece_after_std": 0.04145139788963651,
+      "n_outer_evaluations": 25,
+      "improved_fraction": 0.8
+    }
   }
 }

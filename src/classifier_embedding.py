@@ -35,10 +35,22 @@ class _Centroid:
 class EmbeddingClassifier:
     name = "embedding_centroid"
 
-    def __init__(self, model_name: str = DEFAULT_MODEL) -> None:
+    def __init__(
+        self,
+        model_name: str = DEFAULT_MODEL,
+        embedding_cache: dict[str, np.ndarray] | None = None,
+    ) -> None:
         self.model_name = model_name
         self._model = None
         self.centroids: list[_Centroid] = []
+        # Keyed by Email.email_id. Evaluation re-fits this classifier on the
+        # order of a hundred times (cross-validation plus the nested
+        # calibration check); re-encoding the same 44-56 texts with the
+        # transformer every time would make that impractically slow, so
+        # evaluate.py precomputes embeddings once and passes them in here.
+        # Without a cache, the classifier still works standalone by encoding
+        # on the fly.
+        self._embedding_cache = embedding_cache
 
     def _get_model(self):
         if self._model is None:
@@ -53,10 +65,17 @@ class EmbeddingClassifier:
         norms[norms == 0] = 1.0
         return vectors / norms
 
-    def fit(self, emails: list[Email]) -> "EmbeddingClassifier":
+    def _embed(self, emails: list[Email]) -> np.ndarray:
+        if self._embedding_cache is not None:
+            missing = [e for e in emails if e.email_id not in self._embedding_cache]
+            if not missing:
+                return np.stack([self._embedding_cache[e.email_id] for e in emails])
         model = self._get_model()
         texts = [e.text for e in emails]
-        embeddings = self._normalize(np.asarray(model.encode(texts)))
+        return self._normalize(np.asarray(model.encode(texts)))
+
+    def fit(self, emails: list[Email]) -> "EmbeddingClassifier":
+        embeddings = self._embed(emails)
 
         by_label: dict[str, list[np.ndarray]] = defaultdict(list)
         for email, vec in zip(emails, embeddings):
@@ -68,30 +87,32 @@ class EmbeddingClassifier:
         ]
         return self
 
-    def predict(self, emails: list[Email]) -> list[Prediction]:
+    def predict_proba(self, emails: list[Email]) -> tuple[list[str], np.ndarray]:
         if not self.centroids:
-            raise RuntimeError("Call fit() before predict().")
-        model = self._get_model()
-        texts = [e.text for e in emails]
-        embeddings = self._normalize(np.asarray(model.encode(texts)))
+            raise RuntimeError("Call fit() before predict_proba().")
+        embeddings = self._embed(emails)
 
         centroid_matrix = np.stack([c.vector for c in self.centroids])  # (n_classes, dim)
         labels = [c.label for c in self.centroids]
 
         similarities = embeddings @ centroid_matrix.T  # (n_emails, n_classes), cosine sim since both normalized
 
+        scaled = similarities / TEMPERATURE
+        scaled -= scaled.max(axis=1, keepdims=True)  # numerical stability
+        weights = np.exp(scaled)
+        probs = weights / weights.sum(axis=1, keepdims=True)
+        return labels, probs
+
+    def predict(self, emails: list[Email]) -> list[Prediction]:
+        labels, probs = self.predict_proba(emails)
         results = []
-        for email, sims in zip(emails, similarities):
-            scaled = sims / TEMPERATURE
-            scaled -= scaled.max()  # numerical stability
-            weights = np.exp(scaled)
-            probs = weights / weights.sum()
-            best_idx = int(probs.argmax())
+        for email, row in zip(emails, probs):
+            best_idx = int(row.argmax())
             results.append(
                 Prediction(
                     email_id=email.email_id,
                     predicted_category=labels[best_idx],
-                    confidence_score=float(probs[best_idx]),
+                    confidence_score=float(row[best_idx]),
                 )
             )
         return results
