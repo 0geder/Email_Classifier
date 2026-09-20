@@ -28,7 +28,7 @@ markers and the message text out of the nested `<body>`, rather than
 treating the whole file as flat text. Treating it as flat text would let the
 CSS, a duplicated `<title>`, and layout markup pollute the input.
 
-**Assumption flagged:** the on-disk filename (`email_10.html`) is *not* a
+Assumption flagged: the on-disk filename (`email_10.html`) is *not* a
 stable identifier: train and test each restart numbering at 1, so
 `train/email_1.html` and `test/email_1.html` would collide if I used the
 filename as `email_id`. Each file also carries an internal
@@ -45,18 +45,18 @@ The original plan going into this was an LLM API as the primary classifier
 score), with a classical TF-IDF baseline for comparison. Two things in the
 actual environment changed that.
 
-1. **No API key was available** in the environment this has to run in, and
+1. No API key was available in the environment this has to run in, and
    the spec is explicit that the solution "must be written using only open
    source tools... so we can run your solution and check your results." A
    hosted LLM call is a hard external dependency a reviewer cannot satisfy
    without their own paid key; that is a real risk to whether this even runs
    for the grader, not a stylistic preference.
-2. **44 labeled examples is not enough to fine-tune anything.** Whatever the
+2. 44 labeled examples is not enough to fine-tune anything. Whatever the
    primary approach was, it needed to work well with roughly 9 examples per
    class.
 
-So the primary approach became a **frozen sentence-embedding encoder
-(`all-MiniLM-L6-v2`) with a nearest-centroid classifier**: embed each labeled
+So the primary approach became a frozen sentence-embedding encoder
+(`all-MiniLM-L6-v2`) with a nearest-centroid classifier: embed each labeled
 email, average the embeddings per class into a centroid, and classify a new
 email by cosine similarity to each centroid (softmax over similarities gives
 the confidence score). This needs no training beyond averaging a handful of
@@ -68,7 +68,7 @@ offline substitute for "LLM-based understanding" that does not require an
 API key, and it directly answers the spec's explicit allowance for "LLMs or
 other NLP techniques."
 
-**TF-IDF plus Logistic Regression** stayed in as the baseline it was always
+TF-IDF plus Logistic Regression stayed in as the baseline it was always
 meant to be: the naive benchmark the smarter approach has to beat, and a
 useful sanity check on whether the embedding classifier earns its extra
 complexity.
@@ -85,9 +85,9 @@ Future Work).
 
 ### Confidence scores
 
-- **Baseline (TF-IDF plus Logistic Regression):** `predict_proba` output for
+- Baseline (TF-IDF plus Logistic Regression): `predict_proba` output for
   the winning class.
-- **Embedding classifier:** softmax over cosine similarities to each class
+- Embedding classifier: softmax over cosine similarities to each class
   centroid (temperature 0.05, chosen empirically so the softmax is peaked
   enough to be informative without being close to one-hot).
 
@@ -103,8 +103,8 @@ what makes the calibration work in the next section possible.
 trustworthy: a 20 percent split leaves only one or two examples per class in
 validation. A single pass of cross-validation is better, but its headline
 numbers still depend somewhat on how that one random fold assignment
-happened to fall. The evaluation therefore uses **5-fold stratified
-cross-validation repeated 10 times**, with each labeled email's out-of-fold
+happened to fall. The evaluation therefore uses 5-fold stratified
+cross-validation repeated 10 times, with each labeled email's out-of-fold
 probability vector averaged across all ten runs
 (`src/evaluate.py::_pooled_out_of_fold`), and reports accuracy, macro-F1,
 per-class precision and recall, a bootstrap confidence interval on accuracy,
@@ -122,7 +122,7 @@ no honest metric can be computed on them.
 | Model | Accuracy | 95% bootstrap CI | Macro-F1 | ECE, raw to calibrated |
 |---|---|---|---|---|
 | TF-IDF + Logistic Regression (baseline) | 0.932 | 0.841 to 1.000 | 0.904 | 0.496 to 0.069 |
-| **Sentence-embedding + nearest-centroid (primary)** | **0.955** | **0.886 to 1.000** | **0.945** | **0.105 to 0.034** |
+| Sentence-embedding + nearest-centroid (primary) | 0.955 | 0.886 to 1.000 | 0.945 | 0.105 to 0.034 |
 
 The embedding classifier wins on accuracy, macro-F1, and calibration. Its
 cross-validation is now also inexpensive: embeddings are computed once and
@@ -130,10 +130,10 @@ cached rather than recomputed on every fold (see Statistical Rigor), so a
 full run of `evaluate.py`, including one-time model loading and encoding of
 every email, completes in under a minute end to end.
 
-**Per-class breakdown.** Both models are near-perfect on Insurance Claims,
+Per-class breakdown. Both models are near-perfect on Insurance Claims,
 Investment Advisory and Loan Processing (F1 0.92 to 1.00), which have
 distinct, consistent vocabulary ("claim", "premium" versus "portfolio",
-"fund" versus "loan", "repayment"). Both are noticeably weaker on **Other**:
+"fund" versus "loan", "repayment"). Both are noticeably weaker on Other:
 
 | Model | Other precision | Other recall | Other F1 |
 |---|---|---|---|
@@ -155,7 +155,7 @@ feasibility methodology below) were adopted after reviewing an alternative
 approach to this same challenge; see Comparative Review of an Alternative
 Approach for exactly what was reused and what was not.
 
-**Bootstrap confidence intervals.** With only 44 labeled examples, a point
+Bootstrap confidence intervals. With only 44 labeled examples, a point
 accuracy estimate implies more precision than the sample supports. A
 5,000-resample bootstrap on the out-of-fold correctness array gives the
 primary embedding classifier a 95 percent confidence interval of 0.886 to
@@ -164,7 +164,7 @@ to 1.000 around 0.932. Reporting the interval, not just the point estimate,
 is part of being honest about what this evaluation can and cannot claim
 (`calibration.bootstrap_accuracy_ci`).
 
-**Calibration, verified against leakage.** Both classifiers' raw confidence
+Calibration, verified against leakage. Both classifiers' raw confidence
 scores are miscalibrated in different directions. The baseline is badly
 under-confident (expected calibration error, ECE, of 0.496 before scaling),
 while the embedding classifier starts much closer to calibrated already (ECE
@@ -180,11 +180,11 @@ calibration gain holds up fully out of sample: ECE falls from 0.505 to 0.091,
 an improvement in 100 percent of the 25 outer evaluations. The embedding
 classifier's smaller raw miscalibration leaves less room to improve, and the
 nested check shows a correspondingly smaller but still real gain, from 0.087
-to 0.074, improving in 80 percent of evaluations. The **calibrated**
+to 0.074, improving in 80 percent of evaluations. The calibrated
 confidence score, not the raw softmax or `predict_proba` output, is what is
 written into `results/predictions.csv` and the per-model prediction files.
 
-**Risk-coverage and an evidence-based operating threshold.**
+Risk-coverage and an evidence-based operating threshold.
 `calibration.risk_coverage_table` sweeps the auto-routing confidence
 threshold and reports coverage, accuracy on the auto-routed emails, and the
 resulting misroute count at each level. For the primary embedding classifier,
@@ -194,7 +194,7 @@ misroutes observed in cross-validation; the baseline needs a threshold of
 intuition, is what an operating threshold should be chosen from. Full tables
 for both models are in `results/evaluation_report.txt`.
 
-**Conformal prediction: currently infeasible, and by how much.** A
+Conformal prediction: currently infeasible, and by how much. A
 distribution-free, class-conditional coverage guarantee (Mondrian conformal
 prediction) would be a stronger, more regulator-defensible way to bound a
 routing decision than a heuristic confidence threshold. It is not available
@@ -206,7 +206,7 @@ set, Other, has 6 labeled examples. That is a concrete, quantified case for
 collecting more labels in the smallest classes, rather than a vague one, and
 a specific number to plan around.
 
-**Cost-weighted error.** Treating every misclassification as equally bad
+Cost-weighted error. Treating every misclassification as equally bad
 understates the cost of misrouting a regulated category. Weighting each
 error by an illustrative per-class cost (Insurance Claims 5, Loan Processing
 4, Investment Advisory 3, Account Management 2, Other 1) gives 0.045 per
@@ -232,7 +232,7 @@ calculation. On the same 44 labeled emails, they reported an accuracy of
 0.932 and a macro-F1 of 0.904. Those are their own reported figures from
 their own code, not reproduced or verified here.
 
-**What this project adopted**, reimplemented independently in
+What this project adopted, reimplemented independently in
 `src/calibration.py` and `src/evaluate.py`, and applied to both of this
 project's own classifiers:
 
@@ -247,7 +247,7 @@ project's own classifiers:
   genuine macro-F1 gain (0.864 without character n-grams, 0.904 with them),
   and only then was it kept as the default (see Assumptions and Trade-offs).
 
-**What was deliberately not adopted:** a reject-option framing, training a
+What was deliberately not adopted: a reject-option framing, training a
 model only on the four business categories and assigning Other whenever
 confidence falls below a threshold. Both explorations tested this
 independently and rejected it for the same reason: Other, in this dataset,
@@ -281,7 +281,7 @@ bug.
 
 ## How I would measure success in production, and what would improve accuracy
 
-**Measuring success**, given the regulatory stakes of misrouting:
+Measuring success, given the regulatory stakes of misrouting:
 
 - Track precision and recall *per class*, not just overall accuracy. A false
   positive that routes a claim to Other is a worse failure than confusing
@@ -295,7 +295,7 @@ bug.
   automate around than one that is occasionally very wrong with high
   confidence. Refit and re-verify the temperature (with the nested check
   demonstrated above) whenever the model is retrained.
-- Maintain a **human-in-the-loop review queue** for low-confidence
+- Maintain a human-in-the-loop review queue for low-confidence
   predictions, informed directly by the risk-coverage table above, and audit
   a sample of *high-confidence* predictions periodically to catch silent
   drift. Confidently wrong is the failure mode that costs the most in a
@@ -310,7 +310,7 @@ bug.
   decisions on regulated correspondence should itself produce an auditable
   decision trail, not just a label.
 
-**What would improve accuracy and compliance value most, with more data:**
+What would improve accuracy and compliance value most, with more data:
 
 - More labeled examples per class. 44 total is enough to demonstrate the
   approach, not to fully validate it; the bootstrap confidence interval on
@@ -390,22 +390,22 @@ Sources: [FINRA Email Retention Requirements (2026 Guide), Smarsh](https://www.s
 
 ## Future work
 
-1. **Add a true zero-shot LLM classifier as a third comparison arm** once an
+1. Add a true zero-shot LLM classifier as a third comparison arm once an
    API key, or a locally hosted open model via Ollama, is available. This was
    the original plan's primary approach and would likely handle ambiguous or
    boundary-case emails better than similarity to centroid, particularly ones
    that do not closely resemble any of the 44 training examples.
-2. **Collect enough labeled examples in the smallest classes** (9 per class
+2. Collect enough labeled examples in the smallest classes (9 per class
    minimum, 19 preferred) to make a formal class-conditional conformal
    prediction guarantee feasible. This would be a stronger, more
    regulator-defensible claim than the heuristic confidence threshold used
    today, and the exact numbers needed are already known (see Statistical
    Rigor).
-3. **Active learning loop.** Route low-confidence predictions to a human
+3. Active learning loop. Route low-confidence predictions to a human
    reviewer, feed the correction back into the training set, and refit
    periodically. This turns the human-in-the-loop production recommendation
    above into an actual mechanism for the model to keep improving, instead of
    only ever being retrained manually.
-4. **Multi-label support.** The current design assumes one category per
+4. Multi-label support. The current design assumes one category per
    email, but a real email ("please also update my beneficiary and file a
    claim") could legitimately belong to more than one department.
